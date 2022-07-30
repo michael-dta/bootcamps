@@ -25,13 +25,14 @@ echo "[*] Creating users..."
 
 group_user=""
 for i in ${!users[@]}; do
-    if [ i>=0 && i<=2 ]; then
+    if [[ $i>=0 && $i<=2 ]]; then
 	group_user=${groups[0]}
-    elif [ i>=3 && i<=5 ]; then
-	group_user=${gropus[1]}
-    else
+    elif [[ $i>=3 && $i<=5 ]]; then
+	group_user=${groups[1]}
+    elif [[ $i>=6 && $i<=8 ]]; then
 	group_user=${groups[2]}
     fi
+
     useradd ${users[$i]} -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G $group_user
 done
 
