@@ -28,6 +28,6 @@ rm /var/www/html/index.html
 
 echo -e "\n[*] Copiando os arquivos do site de exemplo para o diretório padrão do apache..."
 
-cp ./linux-site-dio-main/* /var/www/html/
+cp -rv ./linux-site-dio-main/* /var/www/html/
 
 echo -e "\n[!] Script IaC servidor Web Apache foi finalizado com sucesso."
