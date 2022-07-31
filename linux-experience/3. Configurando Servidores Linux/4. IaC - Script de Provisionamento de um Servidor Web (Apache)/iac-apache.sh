@@ -23,7 +23,7 @@ wget https://github.com/denilsonbonatti/linux-site-dio/archive/refs/heads/main.z
 
 echo "[*] Descompactando os arquivos e excluindo o zip..."
 
-unzip /tmp/main.zip
+unzip /tmp/main.zip /tmp/
 rm /tmp/main.zip
 
 echo "[*] Excluindo página web padrão do apache..."
