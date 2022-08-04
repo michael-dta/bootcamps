@@ -1,0 +1,486 @@
+2. Primeiros passos com o Sistema Operacional Linux
+
+	2.7 Gerenciamento de Discos
+
+		2.7.1 Discos, sistemas de arquivos e partições
+		
+		Sistema de arquivos é um padrão, uma forma como o sistema operacional usa para controlar como os dados são armazenados e recuperados.
+	
+		Sistema Operacional		Sistemas de arquivos
+		-------------------		--------------------
+		MacOS					HFS
+		Unix/Linux				Ext3, Ext4, XFS
+		Windows					FAT32, NTFS
+		
+		Particionamento
+	
+		De um modo geral, o particionamento é a divisão de um disco em partes. Cada parte ou partição é independente da outra. Cada partição pode ter um sistema de arquivos diferente.
+		
+		Partições no Windows
+		
+		Cada partição é reconhecida como uma unidade e nomeada como uma letra: C, D, E etc.
+		
+		Partições no Linux
+		
+		No Linux, cada disco recebe um nome iniciado por sd: sda, sdb, sdc...
+		Cada partição do disco é numerada. Exemplo: sda1, sda2 sda3, sdb1, sdb2...
+		
+		2.7.2 Listando partições
+		
+		lsblk -o +ROTA,DISC-GRAN
+		lsblk | grep sd
+		fdisk -l
+		
+		2.7.3 Particionando e formatando discos via terminal
+		
+		Criando partição no disco:
+		
+		sudo fdisk /dev/sdb
+		
+		Dentro do fdisk, siga as orientações abaixo:
+		
+		Command (m for help): n					# new partition
+		Select (default p): p					# p: primary OR e: extension
+		Partition number (1-4, default 1): 1
+		First sector (default 2048): <ENTER>
+		Last sector (default xxx): <ENTER>
+		Command (m for help): w					# write table to disk and exit
+		
+		Formatando o disco:
+		
+		sudo mkfs.ext4 /dev/sdb
+		Proceed anyway? (y,N) y
+		
+		2.7.4 Montando e desmontando discos
+		
+		Existe um diretório específico para montagem e desmontagem de discos conhecido como /mnt.
+		
+		Montagem de disco:
+		
+		mkdir -p /mnt/disk2
+		sudo mount /dev/sdb /mnt/disk2/
+		
+		Desmontagem de disco:
+		
+		sudo unmount /dev/sdb
+		
+		Se reiniciarmos a máquina, o disco não estará montado e precisaremos montá-lo novamente se quisermos acessar ou alterar seu conteúdo.
+		
+		2.7.5 Montando discos automaticamente
+		
+		sudo vi /etc/fstab
+		
+		Dentro do arquivo de configuração, adicione nas última linha:
+		
+		# <file system> <mount point> <type> <options> <dump> <pass>
+		/dev/sdb /mnt/disk2/ ext4 defaults 0 0
+		
+		Depois reinicie a máquina e entre no disco já montado.
+
+		reboot
+		cd /mnt/disk2
+		
+		Materiais de apoio:
+		
+		https://docs.google.com/presentation/d/1JQrDl3tq-9NW7F-eba-_wONHSOh7KlwxZVLlW8_SGMY/edit#slide=id.p3
+		
+	2.8 Copiando Arquivos e Manipulando Processos
+	
+		2.8.1 Copiando arquivos
+		
+		Comandos do binário cp:
+		
+		cp --help
+		
+		Modo de usar o comando cp:
+		
+		cp <origin> <destination>
+		
+		Copiar um único arquivo: 
+		
+		cp /home/user/file.txt /mnt/disk2/
+		
+		Copiar todos os arquivos que possuem extensão .txt:
+		
+		cp /home/user/*.txt /mnt/disk2/
+		
+		Copiar todos os arquivos que começam com a letra "a":
+		
+		cp /home/user/a* /mnt/disk2/
+		
+		O comando cp automaticamente irá sobreescrever todos os arquivos previamente existentes. Caso queira exibir uma notificação alertando se pode continuar sobreescrevendo os arquivos, então devemos utilizar a flag ou opção "-i":
+		
+		Copiar todos os arquivos e perguntar se pode sobreescrever:
+		
+		cp -i /home/user/* /mnt/disk2/
+		
+		Copiar todos os arquivos e diretórios:
+		
+		cp -r /home/user/* /mnt/disk2/
+		
+		Copiar arquivos e diretórios com modo verboso:
+		
+		cp -r -v /home/user/* /mnt/disk2/
+		ou
+		cp -rv /home/user/* /mnt/disk2/
+		
+		2.8.2 Renomeando e movendo arquivos
+		
+		Modo de uso do comando mv:
+		
+		mv <origin> <destination>
+		
+		Mover um único arquivo com o mesmo nome:
+		
+		mv /home/user/file.txt /mnt/disk2/
+		
+		Mover todos os arquivos mantendo os mesmos nomes:
+		
+		mv /home/user/* /mnt/disk2/
+		
+		Mover todos os arquivos mantendo os mesmos nomes, ativar o modo verboso e perguntar antes de sobreescrever:
+		
+		mv -vi /home/user/* /mnt/disk2/
+		
+		Observação: o comando mv não move diretórios não-vazios, ou seja, nesse caso não funciona o modo recursivo.
+		
+		Renomear um arquivo/diretório:
+		
+		mv firstname.txt second_name.txt
+		ou
+		mv ./firstdir/ ./second_dir/
+		
+		2.8.3 Iniciando, visualizando e encerrando um processo
+		
+		Utilizamos o comando ps para visualizar os processos.
+		
+		Algumas opções/flags do comando ps:
+		
+		-a		mostra os processos de todos os usuários.
+		-u		fornece o nome do uusário e a hora que o processo foi iniciado.
+		-x		mostra os processos que foram executados fora do console.
+		
+		Visualizar os processos:
+		
+		ps aux
+		
+		Encerrar um processo:
+		
+		kill <pid>
+		ou
+		killall <name>
+		
+		Quais usuários estão logados no sistema:
+		
+		w
+		ou
+		who -a
+		
+		Observação: a vantagem do comando who -a é que conseguindo identificar o PID do processo de qualquer usuário logado no sistema. Com posse dessa informação, o usuário root poderia derrubar a sessão de qualquer usuário.
+		
+	Desafio de projeto - Infraestrutura como Código: Script de Criação de Estrutura de Usuários, Diretórios e Permissões
+	
+		O que é Infraestrutura como Código (Iac)?
+		
+		É o gerenciamento e provisionamento da infraestrutura por meio de códigos, em vez de processos manuais.
+		
+		Com a IaC, são criados arquivos de configuração que incluem as especificações da sua infraestrutura, facilitando a edição e a distribuição de configurações. Ela também assegura o provisionamento do mesmo ambiente todas as vezes.
+		
+		Controle de versão
+		
+		O controle de versão é um parte importante da IaC. Os arquivos de configuração devem pertencer à fonte como qualquer outro código-fonte de software. Ao implantar a infraestrutura como código, também é possível separá-la em módulos, que podem ser combinados de diferentes maneiras por meio da automação.
+		
+		Principal benefício
+		
+		Ao automatizar o provisionamento da infraestrutura com a IaC, os desenvolvedores não precisam provisionar e gerenciar manualmente servidores, sistemas operacionais, armazenamento e outros componentes de infraestrutura sempre que criam ou implantam uma aplicação.
+		
+		O que iremos provisionar na infraestrutura?
+		
+		Diretórios:
+		
+		/publico	/adm 	/ven	/sec
+		
+		Grupos:
+		
+		GRP_ADM 	GRP_VEN 		GRP_SEC
+		
+		Usuários:
+		
+		carlos		debora			josefina
+		maria		sebastiana		amanda
+		joao		roberto			rogerio
+		
+		Código do professor:
+		
+		vi iac.sh
+
+#!/bin/bash
+
+echo "Criando diretórios..."
+
+mkdir /publico
+mkdir /adm
+mkdir /ven
+mkdir /sec
+
+echo "Criando grupos de usuários..."
+
+groupadd GRP_ADM
+groupadd GRP_VEN
+groupadd GRP_SEC
+
+echo "Criando usuários..."
+
+useradd carlos -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_ADM
+useradd maria -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_ADM
+useradd joao -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_ADM
+
+useradd debora -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_VEN
+useradd sebastiana -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_VEN
+useradd roberto -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_VEN
+
+useradd josefina -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_SEC
+useradd amanda -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_SEC
+useradd rogerio -m -s /bin/bash -p $(echo Senha123 | openssl passwd --stdin) -G GRP_SEC
+
+echo "Resetando as senhas após o primeiro login..."
+
+passwd carlos -e
+passwd maria -e
+...
+
+echo "Especificando permissões de dono e grupo nos diretórios..."
+
+chown root:GRP_ADM /adm
+chown root:GRP_VEN /ven
+chown root:GRP_SEC /sec
+
+echo "Atribuindo permissões de leitura, escrita e execução nos diretórios..."
+
+chmod 770 /adm
+chmod 770 /ven
+chmod 770 /sec
+chmod 777 /publico
+
+echo "Fim..."
+
+		chmod +x iac.sh
+		./iac.sh
+		
+		Depois, devemos criar um novo repositório no nosso GitHub e na pasta onde está o script iremos digitar:
+		
+		git init
+		git config --global user.email <email>
+		git config --global user.name <username>
+		git add *
+		git commit -m "Arquivos IaC"
+		git branch -M main
+		git remote add origin <github repository>
+		git push -u origin main
+		
+		Materiais de Apoio
+		
+		Apresentação:
+		
+		https://docs.google.com/presentation/d/1_vwPcBh7YUhUfu37lAUYQqhhP8LMmPHRCXo1Bc7czTs/edit#slide=id.p3
+		
+		Projeto Github do expert:
+		
+		https://github.com/denilsonbonatti/linux-projeto1-iac
+		
+3. Configurando Servidores Linux
+
+	3.1 Servidores de Arquivos com Linux
+	
+		3.1.1 Instalaçã do SAMBA e configuração inicial
+		
+			Samba Wiki:
+			
+			https://wiki.samba.org/index.php/Main_Page
+			
+			Devemos criar um snapshot da nossa máquina virtual com o nome "Servidor de Arquivos" para termos um ponto de restauração se quisermos voltar ao estado da máquina antes da configuração do samba.
+			
+			Instalação do samba:
+			
+			apt install samba -y
+			
+			Não é recomendado utilizar o disco onde está o sistema operacional para o compartilhamento de arquivos. Portanto, iremos utilizar o segundo disco que formatamos na aula de particionamento e formatação de discos (/mnt/disk2).
+			
+			iremos criar uma pasta de compartilhamento geral, ou seja, qualquer usuário poderá acessar essa pasta e terão permissão de leitura, escrita e execução.
+			
+			cd /mnt/disk2
+			mkdir publica
+			chmod 777 publica/
+			vi /etc/samba/smb.conf
+			
+			Há um configuração do samba que indica onde inicialmente não teremos nenhuma restrição de usuário:
+			
+			map to guest = bad user
+			
+			No final do arquivo, iremos adicionar a seguinte linha:
+			
+			# Nome do compartilhamento (não precisa ter o mesmo nome da pasta)
+			[publica]
+			
+				# Onde está localizada a pasta
+				path = /mnt/disk2/publica/
+				
+				# Informa que a pasta está liberada para gravação/escrita
+				writable = yes
+				
+				# Indica que qualquer usuário pode ter acesso a essa pasta
+				guest ok = yes
+				
+				# Como é uma pasta pública, então informamos que todo usuário que acessá-la é um convidado
+				guest only = yes
+			
+			Reiniciamos o daemon do samba:
+			
+			systemctl restart smbd
+			systemctl status smbd	# precisa aparecer status: active (running)
+			
+			Para autoinicializar o samba quando o sistema der boot, utilizamos o comando abaixo:
+			
+			systemctl enable smbd
+			
+		3.1.2 Configurando o acesso via máquina cliente
+		
+			No Windows, podemos facilitar o acesso a pasta compartilhada pelo seguinte caminho:
+			
+			1. Clique com botão direito em Meu Computador.
+			2. Selecione Mapear unidade de rede.
+			3. Informe o caminho \\<IP do Servido de Arquivos>\<compartilhamento>
+			4. Selecione a opção Reconectar-se na entrada.
+			
+	3.2 Criando um Servidor Web com Linux
+		
+		3.2.1 Instalando o apache2
+		
+			Comando para instalar o servidor de web apache2:
+			
+			apt install apache2 -y
+			
+			Verificar se o servidor está rodando e ouvindo requisições:
+			
+			systemctl status apache2
+			
+			Verificar o endereço IP da nossa máquina:
+			
+			ip a
+			
+			Digitamos o endereço IP no navegador para carregarmos a página padrão do apache. Por padrão, a página fica localizada na seguinte pasta:
+			
+			/var/www/html/index.html
+			
+			Iremos criar nossa própria paǵina web e, para isso, vamos deletar a página padrão do apache:
+			
+			rm index.html
+			
+			Agora vamos criar nossa página personalizada:
+			
+			vi index.html
+			
+			<html>
+				<h1>Este e o meu site HTML disponivel em um servidor Linux</h1>
+			</html>
+			
+			Se atualizarmos a página no navegador vamos perceber que será exibido nossa página web.
+			
+			> Observação: o servidor web fornece escuta e envia requisições dentro da nossa rede local. Para termos um site disponível na internet teríamos que ter um IP fixo na internet e direcionado por um servidor DNS na internet.
+			
+	3.3 Servidor de Banco de Dados com Linux
+	
+		3.3.1 Instalando o MySQL
+		
+			O mundo ideal é que tenha cada serviço em servidores diferentes, pois em caso de perda total de um servidor você perde apenas um serviço e não todos ao mesmo tempo.
+			
+			Instalação:
+			
+			apt search mysql-server
+			apt install mysql-server-X.X -y
+			
+			Fazendo login no servidor mysql:
+			
+			mysql -u root -p
+			
+			Listar todos os bancos de dados:
+			
+			show databases;
+			
+			Criar um novo banco de dados:
+			
+			create database meubanco;
+			
+			Selecionar banco de dados criado:
+			
+			use meubanco;
+			
+			Criar nova tabela no banco de dados selecionado:
+			
+			create table Pessoas (PessoaID int, Nome varchar(50), Sobrenome varchar(50), Endereco varchar(100), Cidade varchar(50))
+			
+			Inserir dados dentro da tabela Pessoas:
+			
+			insert into Pessoas (PessoaID, Nome, Sobrenome, Endereco, Cidade) values (1, 'Carlos', 'da Silva', 'Av. do carmo, 500', 'Jaboticabal-SP');
+			
+			Verificando se os dados foram inseridos corretamente:
+			
+			select * from Pessoas;
+			
+			Observação: podemos acessar o banco de dados remotamente através do MySQL Workbench ou através da nuvem, de uma aplicação php ou nodejs por exemplo.
+			
+			Para sair do banco de dados:
+			
+			exit
+			
+	3.4 Infraestrutura como Código - Script de Provisionamento de um Servidor Web (Apache)
+	
+		Neste projeto iremos criar um script onde será provisionado um servidor web automaticamente. Um servidor web é um software e hardware que usa HTTP (Hypertext Transfer Protocol) e outros protocolos para responder a solicitações de clientes feitas pela World Wide Web. O principal trabalho de um servidor da web é exibir o conteúdo do site por meio do armazenamento, processamento e entrega de páginas da web aos usuários.
+		
+		A apresentação completa utilizada durante o curso está disponível [AQUI](https://docs.google.com/presentation/d/1TdVrpZuMEVij9h3yAWbAHUR5HSRWwGfKhb1mbtCB0Y0/edit?usp=sharing)
+		
+	3.5 Docker: Utilização Prática no Cenário de Microsserviços
+	
+		3.5.1 Migrar para uma nuvem pública
+		
+			Problemas com a numvem privada
+			
+			1. Dificuldades com a segurança da tecnologia da informação (lógica e física)
+			2. Custo com mão de obra especializada
+			3. Custo de hardware
+			4. Custo de energia elétrica
+			5. Falta de energia (uso de geradores)
+			6. Despesas inesperadas
+			
+			Vantagens de migrar para a nuvem pública
+			
+			1. Preço (pague somente o que usar)
+			2. Facilidade de contratação, configuração e infraestrutura
+			3. Escalabilidade
+			4. Performance
+			
+			Dito isso, é interessante migrar o sistema para uma arquitetura de microsserviços.
+		
+		3.5.2 Microserviços
+		
+			São um tipo inovador de arquitetura de software que consiste em construir aplicações desmembrando-as em serviços independentes. Estes serviços se comunicam entre si usando APIs e promovem grande agilidade em times de desenvolvimento.
+			
+			Hoje, gigantes do mercado como Netflix e Spotify divulgam a receita do sucesso ao transformar suas aplicações monolíticas em mais de 500 microsserviços.
+			
+			Quando quebramos uma aplicação monolítica em várias pequenas partes, conseguimos escalá-las de forma separada. Supondo que um serviço de autenticação seja chamado várias vezes durante a sessão de um usuário, com certeza o stress sobre ele é maior.
+			
+			Com microsserviços, podemos escalar apenas uma parte, ao invés de ter que escalar a aplicação como um todo, como ocorre em uma arquitetura monolítica.
+			
+			Os microsserviços não necessariamente precisam ser escritos usando a mesma linguagem de programação.
+			
+		3.5.3 O que é um Cluster e Docker Swarm?
+		
+			O que é um Cluster?
+			
+			Consiste em computadores ligados que trabalham em conjunto, de modo que, em muitos aspectos, podem ser considerados como um único sistema. Computadores em cluster executam a mesma tarefa, controlado e programado por software. Cada computador presente em cluster é conhecido como nó (node).
+			
+			O que é Docker Swarm?
+			
+			O Swarm é um recurso do Docker que fornece funcionalidades de orquestração de contêiner, incluindo clustering nativo de hosts do Docker e agendamento de cargas de trabalho de contêineres. Um grupo de hosts do Docker formam um cluster Swarm.
+		
+		3.5.4 
